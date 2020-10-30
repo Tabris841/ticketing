@@ -1,13 +1,14 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { Box, Heading, ListIcon, List, ListItem } from '@chakra-ui/core';
 
 export default function useRequest({ url, method, body, onSuccess }) {
   const [errors, setErrors] = useState(null);
 
-  const doRequest = async () => {
+  const doRequest = async (props = {}) => {
     try {
       setErrors(null);
-      const response = await axios[method](url, body);
+      const response = await axios[method](url, { ...body, ...props });
 
       if (onSuccess) {
         onSuccess(response.data);
@@ -15,15 +16,22 @@ export default function useRequest({ url, method, body, onSuccess }) {
 
       return response.data;
     } catch (err) {
+      console.log(err);
+      debugger;
       setErrors(
-        <div className="alert alert-danger">
-          <h4>Ooops....</h4>
-          <ul className="my-0">
+        <Box>
+          <Heading as="h4" size="md" mt="2">
+            Ooops....
+          </Heading>
+          <List>
             {err.response.data.errors.map((err) => (
-              <li key={err.message}>{err.message}</li>
+              <ListItem key={err.message}>
+                <ListIcon icon="warning" color="red.500" />
+                {err.message}
+              </ListItem>
             ))}
-          </ul>
-        </div>
+          </List>
+        </Box>
       );
     }
   };

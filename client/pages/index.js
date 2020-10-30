@@ -1,18 +1,45 @@
-import buildClient from '../api/build-client';
+import NextLink from 'next/link';
+import { Heading, Link } from '@chakra-ui/core';
 
-const Index = ({ currentUser }) => {
-  return currentUser ? (
-    <h1>You are signed in</h1>
-  ) : (
-    <h1>You are NOT signed in</h1>
+import Wrapper from '../components/wrapper';
+import { Table, Tbody, Thead, Tr, Td, Th } from '../components/table';
+
+const LandingPage = ({ currentUser, tickets }) => {
+  const ticketList = tickets.map((ticket) => {
+    return (
+      <Tr key={ticket.id}>
+        <Td>{ticket.title}</Td>
+        <Td>{ticket.price}</Td>
+        <Td>
+          <NextLink href="/tickets/[ticketId]" as={`/tickets/${ticket.id}`}>
+            <Link>View</Link>
+          </NextLink>
+        </Td>
+      </Tr>
+    );
+  });
+
+  return (
+    <Wrapper>
+      <Heading as="h1">Tickets</Heading>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th>Title</Th>
+            <Th>Price</Th>
+            <Th>Link</Th>
+          </Tr>
+        </Thead>
+        <Tbody>{ticketList}</Tbody>
+      </Table>
+    </Wrapper>
   );
 };
 
-Index.getInitialProps = async (context) => {
-  const client = buildClient(context);
-  const { data } = await client.get('/api/users/currentuser');
+LandingPage.getInitialProps = async (context, client, currentUser) => {
+  const { data } = await client.get('/api/tickets');
 
-  return data;
+  return { tickets: data };
 };
 
-export default Index;
+export default LandingPage;

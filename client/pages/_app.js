@@ -1,27 +1,36 @@
-import 'bootstrap/dist/css/bootstrap.css';
+import { ThemeProvider, CSSReset } from '@chakra-ui/core';
 
 import buildClient from '../api/build-client';
 import Header from '../components/header';
+import customTheme from '../utils/theme';
 
-const MyApp = ({ Component, pageProps, currentUser }) => {
+const AppComponent = ({ Component, pageProps, currentUser }) => {
   return (
-    <>
+    <ThemeProvider theme={customTheme}>
+      <CSSReset />
       <Header currentUser={currentUser} />
-      <Component {...pageProps} />
-    </>
+      <Component currentUser={currentUser} {...pageProps} />
+    </ThemeProvider>
   );
 };
 
-MyApp.getInitialProps = async (appContext) => {
+AppComponent.getInitialProps = async (appContext) => {
   const client = buildClient(appContext.ctx);
   const { data } = await client.get('/api/users/currentuser');
 
   let pageProps = {};
   if (appContext.Component.getInitialProps) {
-    pageProps = await appContext.Component.getInitialProps(appContext.ctx);
+    pageProps = await appContext.Component.getInitialProps(
+      appContext.ctx,
+      client,
+      data.currentUser
+    );
   }
 
-  return { pageProps, ...data };
+  return {
+    pageProps,
+    ...data,
+  };
 };
 
-export default MyApp;
+export default AppComponent;
